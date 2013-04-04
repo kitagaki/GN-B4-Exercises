@@ -2,7 +2,7 @@
 require 'oauth'
 require 'json'
 require 'yaml'
-
+require 'pp'
 #--------- TwitterBot ---------
 class TwitterBot
 
@@ -35,7 +35,7 @@ class TwitterBot
     )
 
     tweet_resource = JSON.parse(response.body)
-
+   
     tweets = Array.new
 
     tweet_resource.each do |tr|
