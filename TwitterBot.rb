@@ -2,7 +2,7 @@
 require 'oauth'
 require 'json'
 require 'yaml'
-require 'pp'
+
 #--------- TwitterBot ---------
 class TwitterBot
 

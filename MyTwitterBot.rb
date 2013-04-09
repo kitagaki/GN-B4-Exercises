@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 require './TwitterBot.rb' # TwitterBot.rbの読み込み
+require './GoogleAPI.rb' 
 require 'open-uri'
 
 #---------- MyTwitterBot ----------                                                                         
@@ -57,10 +58,24 @@ class MyTwitterBot < TwitterBot
    
   end
 
+  #---------- 一番近い予定が何日前か知らせる -----------
+  def tweet_close_event
+
+    cal = GoogleAPI.new
+    event = cal.get_event
+
+    if event["summary"] != nil      
+      tweet( event["summary"] + "が" + event["diff_day"].to_s + "日前です. by bot" )
+    else
+      tweet( "最近は何も予定ないわ～． by bot" )
+    end
+
+  end
+
  
 end
 
 tw = MyTwitterBot.new
 #tw.tweet_requested_msg
 #tw.tweet_weather
-
+#tw.tweet_close_event
