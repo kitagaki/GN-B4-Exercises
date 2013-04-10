@@ -2,6 +2,7 @@
 require './TwitterBot.rb' # TwitterBot.rbの読み込み
 require './GoogleAPI.rb' 
 require 'open-uri'
+require 'csv'
 
 #---------- MyTwitterBot ----------                                                                         
 class MyTwitterBot < TwitterBot
@@ -34,6 +35,38 @@ class MyTwitterBot < TwitterBot
   def get_xxx_msg( msg )
     /「(.+)」と言って/ =~ msg
     return $1
+  end
+
+  #----------- CSVファイルからプロフィールを取得する-----------
+  # return : 名前(String)と誕生日(Date)を含むプロフィール
+  def get_profile( filename )
+    profile = []
+    i = 0
+    CSV.foreach(filename) do |row|
+      profile[i] = {}
+      profile[i]["name"] = row[0]
+      profile[i]["birthday"] = Date.parse(row[1])
+      i += 1
+    end
+    
+    return profile
+  end
+
+  #------------ 指定した日付が今日と一致しているか判定 -----------
+  # return : 一致していたらtrue，そうでなければfalse
+  def is_birthday_today( date )
+    today = Date.today   
+    return ( date.month == today.month && date.day == today.day )
+  end
+
+  #------------ 今日誕生日の人がいたらつぶやく -----------
+  def tweet_birthday
+    profile = get_profile('birthday.csv')
+    profile.each do |prof|
+      if is_birthday_today(prof["birthday"])
+        tweet( "本日は" + prof["name"] + "さんの誕生日です．おめでとうございます！ by bot")
+      end
+    end
   end
 
   #---------- ツイートの要求があればつぶやく----------
@@ -79,3 +112,4 @@ tw = MyTwitterBot.new
 #tw.tweet_requested_msg
 #tw.tweet_weather
 #tw.tweet_close_event
+tw.tweet_birthday

@@ -40,14 +40,31 @@ class GoogleAPI
 
     while true
       events = result.data.items     
-      events.each do |e|        
+      events.each do |e|
+
+        # 終日でない,開始終了のある予定        
         if e.start.date_time != nil          
           diff = (Date.new(e.start.date_time.year, e.start.date_time.month, e.start.date_time.day) - today).to_i
           if most_close_event["diff_day"] > diff && diff >= 0
             most_close_event["diff_day"] = diff
             most_close_event["summary"] = e.summary
           end          
-        end        
+        end
+
+        # 終日の予定
+        if e.start.date != nil
+          date = e.start.date.split('-')
+          diff = (Date.new( date[0].to_i, date[1].to_i, date[2].to_i ) - today).to_i
+          if most_close_event["diff_day"] > diff && diff >= 0
+            most_close_event["diff_day"] = diff
+            most_close_event["summary"] = e.summary
+          end
+        end 
+        
+        #print e.summary
+        #print diff
+        #print "\n"
+
       end
       
       if !(page_token = result.data.next_page_token)
@@ -62,3 +79,4 @@ class GoogleAPI
   end
 
 end
+
