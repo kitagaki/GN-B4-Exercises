@@ -95,16 +95,18 @@ class MyTwitterBot < TwitterBot
   def tweet_close_event
 
     cal = GoogleAPI.new('google-api.yml')
-    event = cal.get_event
+    events = cal.get_events
 
-    if event["summary"] != nil
-      if event["diff_day"] != 0
-        tweet( event["summary"] + "が" + event["diff_day"].to_s + "日前です. by bot" )
+    events.each do |event|
+      if event["summary"] != nil
+        if event["diff_day"] != 0
+          tweet( event["summary"] + "が" + event["diff_day"].to_s + "日前です. by bot" )
+        else
+          tweet( "本日は" + event["summary"] + "です. by bot" )
+        end
       else
-        tweet( "本日は" + event["summary"] + "です. by bot" )
+        tweet( "最近は何も予定ないわ～． by bot" )
       end
-    else
-      tweet( "最近は何も予定ないわ～． by bot" )
     end
 
   end
@@ -113,11 +115,14 @@ class MyTwitterBot < TwitterBot
   def tweet_business_trip
 
     cal = GoogleAPI.new('google-api2.yml')
-    event = cal.get_event
+    events = cal.get_events
     
     today = Date.today
-    if event["start"] <= today && today <= event["end"] && (event["summary"] =~ /乃村先生出張/) != nil
-      tweet( "本日乃村先生は出張です. by bot" )
+    
+    events.each do |event|
+      if event["start"] <= today && today <= event["end"] && (event["summary"] =~ /乃村先生出張/) != nil
+        tweet( "本日乃村先生は出張です. by bot" )
+      end
     end
 
   end
@@ -130,3 +135,8 @@ tw = MyTwitterBot.new
 #tw.tweet_close_event
 #tw.tweet_birthday
 #tw.tweet_business_trip
+#cal = GoogleAPI.new('google-api3.yml')
+#events = cal.get_events
+#events.each do |e|
+#p e
+#end
