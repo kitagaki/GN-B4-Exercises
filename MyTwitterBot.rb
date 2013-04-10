@@ -94,22 +94,39 @@ class MyTwitterBot < TwitterBot
   #---------- 一番近い予定が何日前か知らせる -----------
   def tweet_close_event
 
-    cal = GoogleAPI.new
+    cal = GoogleAPI.new('google-api.yml')
     event = cal.get_event
 
-    if event["summary"] != nil      
-      tweet( event["summary"] + "が" + event["diff_day"].to_s + "日前です. by bot" )
+    if event["summary"] != nil
+      if event["diff_day"] != 0
+        tweet( event["summary"] + "が" + event["diff_day"].to_s + "日前です. by bot" )
+      else
+        tweet( "本日は" + event["summary"] + "です. by bot" )
+      end
     else
       tweet( "最近は何も予定ないわ～． by bot" )
     end
 
   end
 
- 
+   #---------- 本日が乃村先生の出張なら知らせる -----------
+  def tweet_business_trip
+
+    cal = GoogleAPI.new('google-api2.yml')
+    event = cal.get_event
+    
+    today = Date.today
+    if event["start"] <= today && today <= event["end"] && (event["summary"] =~ /乃村先生出張/) != nil
+      tweet( "本日乃村先生は出張です. by bot" )
+    end
+
+  end
+
 end
 
 tw = MyTwitterBot.new
 #tw.tweet_requested_msg
 #tw.tweet_weather
 #tw.tweet_close_event
-tw.tweet_birthday
+#tw.tweet_birthday
+#tw.tweet_business_trip

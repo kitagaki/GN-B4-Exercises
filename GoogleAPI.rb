@@ -7,9 +7,9 @@ require 'date'
 
 class GoogleAPI
 
-  def initialize
+  def initialize( filename )
 
-    oauth_yaml = YAML.load_file('google-api.yml')
+    oauth_yaml = YAML.load_file(filename)
     @client = Google::APIClient.new("application_name"=>"twitterbot")
     @client.authorization.client_id = oauth_yaml["client_id"]
     @client.authorization.client_secret = oauth_yaml["client_secret"]
@@ -28,10 +28,10 @@ class GoogleAPI
   end
 
   #----------- 一番最近行われるイベントを取得する -----------
-  # return : most_close_event
+  # return : most_close_event 予定名，予定までの日数，予定の始まる日，予定の終わる日を含む
   def get_event
 
-    most_close_event = {"summary"=>nil, "diff_day"=>99999}
+    most_close_event = {"summary"=>nil, "diff_day"=>99999, "start"=>nil, "end"=>nil}
 
     today = Date.today
     page_token = nil
@@ -42,22 +42,43 @@ class GoogleAPI
       events = result.data.items     
       events.each do |e|
 
-        # 終日でない,開始終了のある予定        
-        if e.start.date_time != nil          
-          diff = (Date.new(e.start.date_time.year, e.start.date_time.month, e.start.date_time.day) - today).to_i
-          if most_close_event["diff_day"] > diff && diff >= 0
+        # 終日でない,開始終了時刻のある予定        
+        if e.summary != nil && e.start.date_time != nil 
+          start_date = Date.new(e.start.date_time.year, e.start.date_time.month, e.start.date_time.day)
+          end_date = Date.new(e.end.date_time.year, e.end.date_time.month, e.end.date_time.day)
+          
+          if start_date <= today && today <= end_date
+            diff = 0
+          else
+            diff = (start_date - today).to_i
+          end
+
+          if most_close_event["diff_day"] >= diff && diff >= 0
             most_close_event["diff_day"] = diff
             most_close_event["summary"] = e.summary
+            most_close_event["start"] = start_date
+            most_close_event["end"] = end_date
           end          
         end
 
         # 終日の予定
-        if e.start.date != nil
+        if e.summary != nil && e.start.date != nil
           date = e.start.date.split('-')
-          diff = (Date.new( date[0].to_i, date[1].to_i, date[2].to_i ) - today).to_i
-          if most_close_event["diff_day"] > diff && diff >= 0
+          start_date = Date.new( date[0].to_i, date[1].to_i, date[2].to_i )
+          date = e.end.date.split('-')          
+          end_date = Date.new( date[0].to_i, date[1].to_i, date[2].to_i )
+
+          if start_date <= today && today <= end_date
+            diff = 0
+          else
+            diff = (start_date - today).to_i
+          end
+          
+          if most_close_event["diff_day"] >= diff && diff >= 0
             most_close_event["diff_day"] = diff
             most_close_event["summary"] = e.summary
+            most_close_event["start"] = start_date
+            most_close_event["end"] = end_date
           end
         end 
         
