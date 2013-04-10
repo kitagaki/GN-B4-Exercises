@@ -1,4 +1,13 @@
 # -*- coding: utf-8 -*-
+##########################################################################
+# 【GNグループ新人研修課題】RubyによるTwitterBotプログラムの作成
+#
+# ファイルの内容: ボットの詳細な挙動を記述
+#
+# 作成者: 北垣 千拡
+#
+##########################################################################
+
 require './TwitterBot.rb' # TwitterBot.rbの読み込み
 require './GoogleAPI.rb' 
 require 'open-uri'
@@ -95,7 +104,7 @@ class MyTwitterBot < TwitterBot
   def tweet_close_event
 
     cal = GoogleAPI.new('google-api.yml')
-    events = cal.get_events
+    events = cal.get_most_close_events
 
     events.each do |event|
       if event["summary"] != nil
@@ -115,7 +124,7 @@ class MyTwitterBot < TwitterBot
   def tweet_business_trip
 
     cal = GoogleAPI.new('google-api2.yml')
-    events = cal.get_events
+    events = cal.get_most_close_events
     
     today = Date.today
     
@@ -135,8 +144,8 @@ tw = MyTwitterBot.new
 #tw.tweet_close_event
 #tw.tweet_birthday
 #tw.tweet_business_trip
-#cal = GoogleAPI.new('google-api3.yml')
-#events = cal.get_events
-#events.each do |e|
-#p e
-#end
+cal = GoogleAPI.new('google-api2.yml')
+events = cal.get_most_close_events
+events.each do |e|
+p e
+end
