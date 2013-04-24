@@ -3,6 +3,7 @@
 # 【GNグループ新人研修課題】RubyによるTwitterBotプログラムの作成
 #
 # ファイルの内容: ボットの詳細な挙動を記述
+# 起動の仕方    : $ ruby MyTwitterBot.rb
 #
 # 作成者: 北垣 千拡
 #
@@ -52,6 +53,11 @@ class MyTwitterBot < TwitterBot
     profile = []
     i = 0
     CSV.foreach(filename) do |row|
+
+      if(row[1].nil?)
+        return nil
+      end
+
       profile[i] = {}
       profile[i]["name"] = row[0]
       profile[i]["birthday"] = Date.parse(row[1])
@@ -71,6 +77,12 @@ class MyTwitterBot < TwitterBot
   #------------ 今日誕生日の人がいたらつぶやく -----------
   def tweet_birthday
     profile = get_profile('birthday.csv')
+    
+    if(profile.nil?)
+      puts "誕生日を記述したCSVファイルの書式が間違っているか，ファイルの中身が空です"
+      return nil
+    end
+    
     profile.each do |prof|
       if is_birthday_today(prof["birthday"])
         tweet( "本日は" + prof["name"] + "さんの誕生日です．おめでとうございます！ by bot")
@@ -106,15 +118,18 @@ class MyTwitterBot < TwitterBot
     cal = GoogleAPI.new('google-api.yml')
     events = cal.get_most_close_events
 
+    if events.nil? 
+      puts "GoogleCalendarに予定が登録されていません"
+      return nil
+    end
+
     events.each do |event|
       if event["summary"] != nil
         if event["diff_day"] != 0
-          tweet( event["summary"] + "が" + event["diff_day"].to_s + "日前です. by bot" )
+          tweet( event["summary"] + "の" + event["diff_day"].to_s + "日前です. by bot" )
         else
           tweet( "本日は" + event["summary"] + "です. by bot" )
         end
-      else
-        tweet( "最近は何も予定ないわ～． by bot" )
       end
     end
 
@@ -125,6 +140,11 @@ class MyTwitterBot < TwitterBot
 
     cal = GoogleAPI.new('google-api2.yml')
     events = cal.get_most_close_events
+
+    if events.nil?
+      puts "GoogleCalendarに予定が登録されていません"
+      return nil
+    end
     
     today = Date.today
     
@@ -138,14 +158,13 @@ class MyTwitterBot < TwitterBot
 
 end
 
+#################################
+# 起動すると以下が実行される
+#################################
 tw = MyTwitterBot.new
 #tw.tweet_requested_msg
 #tw.tweet_weather
 #tw.tweet_close_event
 #tw.tweet_birthday
 #tw.tweet_business_trip
-cal = GoogleAPI.new('google-api2.yml')
-events = cal.get_most_close_events
-events.each do |e|
-p e
-end
+
