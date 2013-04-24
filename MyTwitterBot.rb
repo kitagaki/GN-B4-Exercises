@@ -162,9 +162,9 @@ end
 # 起動すると以下が実行される
 #################################
 tw = MyTwitterBot.new
-#tw.tweet_requested_msg
-#tw.tweet_weather
-#tw.tweet_close_event
-#tw.tweet_birthday
-#tw.tweet_business_trip
+tw.tweet_requested_msg
+tw.tweet_weather
+tw.tweet_close_event
+tw.tweet_birthday
+tw.tweet_business_trip
 
